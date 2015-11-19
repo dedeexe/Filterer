@@ -72,13 +72,17 @@ public class FilterManager
 
             let imageResizer = ImageAspectRationResizer(image: newValue!, width: self.thumbSizeWidth , height: self.thumbSizeHeight)
             
-            self.thumbSourceImage = imageResizer.renderedImage
-            self.thumbFilteredImage = imageResizer.renderedImage
+            
+            if let renderedImage = imageResizer.renderedImage {
+                self.thumbSourceImage = RGBAImage(image: renderedImage)
+                self.thumbFilteredImage = self.thumbSourceImage
+            }
+
         }
         
         get
         {
-            return self.sourceImage
+            return self.sourceImage?.toUIImage()
         }
     }
     
@@ -95,17 +99,31 @@ public class FilterManager
 
             for (_, filterItem) in self.filterList
             {
-                retImage = (RGBAImage(image: retImage)?.filter(filterItem.filter)?.toUIImage())!
+                retImage = (RGBAImage(rgbaImage: retImage)?.filter(filterItem.filter))!
             }
 
-            return retImage
+            return retImage.toUIImage()
         }
     }
     
     
     public var imageThumb : UIImage?
     {
-        return self.thumbFilteredImage
+        
+        get
+        {
+            guard var retImage = self.thumbFilteredImage else
+            {
+                return nil
+            }
+            
+            for (_, filterItem) in self.filterList
+            {
+                retImage = (RGBAImage(rgbaImage: retImage)?.filter(filterItem.filter))!
+            }
+            
+            return retImage.toUIImage()
+        }
     }
     
     private var filterList : [FilterType : FilterValue] = [

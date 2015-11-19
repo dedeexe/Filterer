@@ -156,14 +156,16 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             
             print("Filter value: \(newValue)")
 
-            dispatch_async(dispatch_get_main_queue()) {
-                do {
-                    try self.filterManager.applyFilter()
-                    self.imageView.image = self.filterManager.imageThumb
-                } catch {
-                    self.imageView.image = nil
-                }
-            }
+            self.imageView.image = self.filterManager.imageThumb
+
+//            dispatch_async(dispatch_get_main_queue()) {
+//                do {
+//                    try self.filterManager.applyFilter()
+//                    self.imageView.image = self.filterManager.imageThumb
+//                } catch {
+//                    self.imageView.image = nil
+//                }
+//            }
             
             return
         }

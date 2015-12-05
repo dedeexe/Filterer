@@ -15,7 +15,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     var filteredImage: UIImage?
     var filteringImage: UIImage?
     
-    var workingFilter: FilterValue?
     var oldFilterValue : Int = 0
     
     
@@ -130,54 +129,17 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
                 filterName = nil
         }
         
-        if let ftname = filterName
-        {
-            if let fltr = filterManager.filter(ftname)
-            {
-                self.workingFilter = fltr
-                
-                self.slideFilterValue!.value = Float(self.workingFilter!.defaultValue)
-                self.slideFilterValue.maximumValue = Float(self.workingFilter!.maxValue)
-                self.slideFilterValue.minimumValue = Float(self.workingFilter!.minValue)
-                
-                slideFilterValue.value = Float(self.workingFilter!.value)
-                showFilterValueView()
-            }
-        }
     }
-    
     
     @IBAction func onChangeFilterValue(sender:UISlider)
     {
-        if let wrkFilter = self.workingFilter {
-            
-            let newValue = Int(sender.value)
-            wrkFilter.value = newValue
-            
-            print("Filter value: \(newValue)")
-
-            self.imageView.image = self.filterManager.imageThumb
-
-//            dispatch_async(dispatch_get_main_queue()) {
-//                do {
-//                    try self.filterManager.applyFilter()
-//                    self.imageView.image = self.filterManager.imageThumb
-//                } catch {
-//                    self.imageView.image = nil
-//                }
-//            }
-            
-            return
-        }
-        
+        //TODO: Implements filter value change
         print("No filter selected")
     }
-    
     
     //Cancel lasts changes
     @IBAction func onFilterChangesCancel(sender:UIButton)
     {
-        self.filterManager.cancelChanges()
         self.imageView.image = self.filterManager.imageThumb
         hideFilterValueView()
     }
@@ -185,7 +147,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     //Confirm lasts changes
     @IBAction func onFilterChangesConfirm(sender:UIButton)
     {
-        self.filterManager.saveChanges()
         self.imageView.image = self.filterManager.imageThumb
         hideFilterValueView()
     }
@@ -245,11 +206,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     {
         
         //Check if exist a filter to work
-        guard let _ = self.workingFilter else
-        {
-            print("No filter to work")
-            return
-        }
+        //TODO: Put herer a filter validation
         
         view.insertSubview(filterValueView, aboveSubview: bottomMenu)
         

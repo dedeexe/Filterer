@@ -22,37 +22,32 @@ public class ContrastFilter : Filter
             return nil
         }
         
+        let factor = (259 * (self.value + 255 )) / (255 * ( 259 - self.value ))
         
-        if self.isActivated
-        {
-            let factor = (259 * (self.value + 255 )) / (255 * ( 259 - self.value ))
-            
-            let width = image.width
-            let height = image.height
+        let width = image.width
+        let height = image.height
 
-            for y in 0..<height {
-                for x in 0..<width {
-                    
-                    let position = y * width + x
-                    var pixel = image.pixels[position]
-                    
-                    var red   = factor * (Int(pixel.red) - 128) + 128
-                    var green = factor * (Int(pixel.green) - 128) + 128
-                    var blue  = factor * (Int(pixel.blue) - 128) + 128
-                    
-                    red   = (red > 255)   ? 255 : (red < 0)   ? 0 : red
-                    green = (green > 255) ? 255 : (green < 0) ? 0 : green
-                    blue  = (blue > 255)  ? 255 : (blue < 0)  ? 0 : blue
+        for y in 0..<height {
+            for x in 0..<width {
+                
+                let position = y * width + x
+                var pixel = image.pixels[position]
+                
+                var red   = factor * (Int(pixel.red) - 128) + 128
+                var green = factor * (Int(pixel.green) - 128) + 128
+                var blue  = factor * (Int(pixel.blue) - 128) + 128
+                
+                red   = (red > 255)   ? 255 : (red < 0)   ? 0 : red
+                green = (green > 255) ? 255 : (green < 0) ? 0 : green
+                blue  = (blue > 255)  ? 255 : (blue < 0)  ? 0 : blue
 
-                    pixel.red   = UInt8(red)
-                    pixel.green = UInt8(green)
-                    pixel.blue  = UInt8(blue)
-                    
-                    image.pixels[position] = pixel
-                }
+                pixel.red   = UInt8(red)
+                pixel.green = UInt8(green)
+                pixel.blue  = UInt8(blue)
+                
+                image.pixels[position] = pixel
             }
         }
-
         
         return image
         

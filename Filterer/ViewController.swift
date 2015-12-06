@@ -15,22 +15,29 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     var filteredImage: UIImage?
     var filteringImage: UIImage?
     var currentFilter : Filter?
+    var currentFilterStartValue : Int?
     
-    @IBOutlet var imageView: UIImageView!
-    @IBOutlet var originalImageView : UIImageView!
-    
-    @IBOutlet var secondaryMenu: UIView!
-    @IBOutlet var bottomMenu: UIView!
-    @IBOutlet var filterValueView : UIView!
-    
-    @IBOutlet var filterButton: UIButton!
-    @IBOutlet var brightFilterButton: UIButton!
+    @IBOutlet weak var workingView: UIView!
+    @IBOutlet weak var originalView: UIView!
     
     
-    @IBOutlet var slideFilterValue : UISlider!
+    @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet weak var originalImageView : UIImageView!
+    
+    @IBOutlet weak var secondaryMenu: UIView!
+    @IBOutlet weak var bottomMenu: UIView!
+    @IBOutlet weak var filterValueView : UIView!
+    
+    @IBOutlet weak var filterButton: UIButton!
+    @IBOutlet weak var brightFilterButton: UIButton!
+    
+    @IBOutlet weak var compareButton: UIButton!
+    
+    @IBOutlet weak var slideFilterValue : UISlider!
     
     
     override func viewDidLoad() {
+        
         super.viewDidLoad()
         secondaryMenu.backgroundColor = UIColor.lightGrayColor().colorWithAlphaComponent(0.95)
         secondaryMenu.translatesAutoresizingMaskIntoConstraints = false
@@ -39,6 +46,10 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         filterValueView.translatesAutoresizingMaskIntoConstraints = false
         
         self.filterManager = FilterManager(width: Int(self.imageView.frame.width) , height: Int(self.imageView.frame.height))
+        self.compareButton.enabled = false
+        
+        //self.insertOriginalImageView()
+
     }
 
     
@@ -89,10 +100,11 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]) {
         dismissViewControllerAnimated(true, completion: nil)
         if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
-            originalImageView.image = image
+            self.compareButton.enabled = false
+            
             filterManager.image = image
             imageView.image = filterManager.imageThumb
-
+            originalImageView.image = filterManager.imageThumb
         }
     }
     
@@ -127,7 +139,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         showFilterValueView()
         self.slideFilterValue.maximumValue = Float(self.currentFilter!.maxValue)
         self.slideFilterValue.minimumValue = Float(self.currentFilter!.minValue)
-        
+        self.slideFilterValue.value = Float(self.currentFilter!.value)
+        self.currentFilterStartValue = self.currentFilter!.value
         
     }
     
@@ -142,13 +155,20 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         
         filter.value = Int(sender.value)
         self.imageView.image = self.filterManager.imageThumb
+        
+        if(!self.compareButton.enabled)
+        {
+            compareButton.enabled = true
+        }
     }
     
     //Cancel lasts changes
     @IBAction func onFilterChangesCancel(sender:UIButton)
     {
+        self.currentFilter!.value = self.currentFilterStartValue!
         self.imageView.image = self.filterManager.imageThumb
         hideFilterValueView()
+        self.currentFilter = nil
     }
 
     //Confirm lasts changes
@@ -156,6 +176,20 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     {
         self.imageView.image = self.filterManager.imageThumb
         hideFilterValueView()
+        self.currentFilter = nil
+    }
+    
+    
+    @IBAction func onCompare(sender:UIButton)
+    {
+        if sender.selected {
+            hideOriginalCompareImage()
+            sender.selected = false
+            return
+        }
+        
+        sender.selected = true
+        showOriginalCompareImage()
     }
     
     //-----------------------------------------------------------------------------------------
@@ -192,17 +226,35 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         }
     }
     
+    
+    
     //MARK: Hide and Show CompareView
     func showOriginalCompareImage()
     {
-        
+        insertOriginalImageView()
+        self.originalView.hidden = false
+        self.workingView.alpha = 0.0
+        self.originalView.setNeedsDisplay()
     }
 
     func hideOriginalCompareImage()
     {
-
+        self.originalView.hidden = true
+        self.workingView.alpha = 1.0
+        removeOriginalImageView()
     }
     
+    func insertOriginalImageView()
+    {
+        self.view.insertSubview(originalView, belowSubview: workingView)
+        self.originalView.frame = self.workingView.frame
+        self.originalView.hidden = true
+    }
+
+    func removeOriginalImageView()
+    {
+        self.originalView.removeFromSuperview()
+    }
     
     //-----------------------------------------------------------------------------------------
     //MARK: - FILTER

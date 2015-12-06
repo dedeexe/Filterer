@@ -31,10 +31,6 @@ public class BrightnessFilter : Filter
         
         let rgbaImage = RGBAImage(rgbaImage: image)
         
-        dump(rgbaImage)
-        print("-----")
-        dump(image)
-        
         print(width, height)
         
         for y in 0..<height {

@@ -47,10 +47,11 @@ public class FilterManager
                 return
             }
             
+            self.resetAllFilters()
+            
             self._sourceImage = RGBAImage(image: newImage)
 
             let imageResizer = ImageAspectRationResizer(image: newValue!, width: self._smallSizeWidth , height: self._smallSizeHeight)
-            
             
             if let renderedImage = imageResizer.renderedImage {
                 
@@ -121,5 +122,13 @@ public class FilterManager
         self._brigthnessFilter = BrightnessFilter()
         self._currentFilter = self._brigthnessFilter
         return self._brigthnessFilter!
+    }
+    
+    
+
+    private func resetAllFilters()
+    {
+        self._currentFilter = nil
+        self._brigthnessFilter = nil
     }
 }

@@ -3,9 +3,6 @@ import UIKit
 /**
 Add Some Contrast to Image
 */
- /**
- Bright filter
- */
 public class ContrastFilter : Filter
 {
     
@@ -33,10 +30,6 @@ public class ContrastFilter : Filter
         let height = image.height
         
         let rgbaImage = RGBAImage(rgbaImage: image)
-        
-        dump(rgbaImage)
-        print("-----")
-        dump(image)
         
         print(width, height)
         

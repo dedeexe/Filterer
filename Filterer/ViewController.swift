@@ -10,7 +10,6 @@ import UIKit
 
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIGestureRecognizerDelegate {
 
-
     var filterManager : FilterManager!
     var filteredImage: UIImage?
     var filteringImage: UIImage?
@@ -18,12 +17,11 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     var currentFilterStartValue : Int?
     
     var compareLongPress : UILongPressGestureRecognizer?
-    
+
     var originalViewInserted : Bool = false
     
     @IBOutlet weak var workingView: UIView!
     @IBOutlet weak var originalView: UIView!
-    
     
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var originalImageView : UIImageView!
@@ -34,6 +32,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     @IBOutlet weak var filterButton: UIButton!
     @IBOutlet weak var brightFilterButton: UIButton!
+    @IBOutlet weak var constrastFilterButton: UIButton!
+    @IBOutlet weak var grayFilterButton: UIButton!
+
     
     @IBOutlet weak var compareButton: UIButton!
     
@@ -52,6 +53,12 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         self.filterManager = FilterManager(width: Int(self.imageView.frame.width) , height: Int(self.imageView.frame.height))
         self.compareButton.enabled = false
         
+        self.view.backgroundColor = UIColor.blackColor()
+        
+        self.bottomMenu.backgroundColor = UIColor.clearColor()
+        self.secondaryMenu.backgroundColor = UIColor.clearColor()
+        self.filterValueView.backgroundColor = UIColor.blackColor()
+        
     }
     
     override func viewDidAppear(animated: Bool)
@@ -61,6 +68,10 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             insertOriginalImageView()
             self.originalViewInserted = true
         }
+    }
+    
+    override func preferredStatusBarStyle() -> UIStatusBarStyle {
+        return UIStatusBarStyle.LightContent
     }
     
     
@@ -112,6 +123,10 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         {
             case self.brightFilterButton:
                 self.currentFilter = filterManager.brigthnessFilter
+            case self.constrastFilterButton:
+                self.currentFilter = filterManager.constrastFilter
+            case self.grayFilterButton:
+                self.currentFilter = filterManager.grayScaleFilter
             default:
                 return
         }

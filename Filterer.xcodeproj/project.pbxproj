@@ -13,6 +13,7 @@
 		4DC1999F1BB201E100AA75E7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4DC1999E1BB201E100AA75E7 /* Assets.xcassets */; };
 		4DC199A21BB201E100AA75E7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4DC199A01BB201E100AA75E7 /* LaunchScreen.storyboard */; };
 		E20BAB4F1BF4DAC400479E59 /* FilterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20BAB4E1BF4DAC400479E59 /* FilterManager.swift */; };
+		E26E7BC11C14C7CF0013F4A2 /* GrayFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E26E7BC01C14C7CF0013F4A2 /* GrayFilter.swift */; };
 		E26FB08A1BF59C1900FFA5A0 /* ImageResizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E26FB0891BF59C1900FFA5A0 /* ImageResizer.swift */; };
 		E2BBB0641BF494C10024893B /* RGBAImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2BBB0631BF494C10024893B /* RGBAImage.swift */; };
 		E2BBB06D1BF4986C0024893B /* RGBFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2BBB0661BF4986C0024893B /* RGBFilter.swift */; };
@@ -31,6 +32,7 @@
 		4DC199A11BB201E100AA75E7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4DC199A31BB201E100AA75E7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E20BAB4E1BF4DAC400479E59 /* FilterManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FilterManager.swift; sourceTree = "<group>"; };
+		E26E7BC01C14C7CF0013F4A2 /* GrayFilter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GrayFilter.swift; sourceTree = "<group>"; };
 		E26FB0891BF59C1900FFA5A0 /* ImageResizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageResizer.swift; sourceTree = "<group>"; };
 		E2BBB0631BF494C10024893B /* RGBAImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RGBAImage.swift; sourceTree = "<group>"; };
 		E2BBB0661BF4986C0024893B /* RGBFilter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RGBFilter.swift; sourceTree = "<group>"; };
@@ -98,6 +100,7 @@
 				E2BBB0661BF4986C0024893B /* RGBFilter.swift */,
 				E2BBB0671BF4986C0024893B /* BrightnessFilter.swift */,
 				E2BBB0681BF4986C0024893B /* ContrastFilter.swift */,
+				E26E7BC01C14C7CF0013F4A2 /* GrayFilter.swift */,
 				E2BBB0691BF4986C0024893B /* Filter.swift */,
 				E2BBB06A1BF4986C0024893B /* FilterProtocol.swift */,
 			);
@@ -180,6 +183,7 @@
 				E2BBB06D1BF4986C0024893B /* RGBFilter.swift in Sources */,
 				E26FB08A1BF59C1900FFA5A0 /* ImageResizer.swift in Sources */,
 				E2BBB06E1BF4986C0024893B /* BrightnessFilter.swift in Sources */,
+				E26E7BC11C14C7CF0013F4A2 /* GrayFilter.swift in Sources */,
 				E2BBB0641BF494C10024893B /* RGBAImage.swift in Sources */,
 				E20BAB4F1BF4DAC400479E59 /* FilterManager.swift in Sources */,
 				4DC199981BB201E100AA75E7 /* AppDelegate.swift in Sources */,

@@ -36,8 +36,6 @@ public class ImageAspectRationResizer
             var newWidth = self.width
             var newHeight = self.height
             
-            print("OLD W:\(width) H:\(height)")
-            
             //Compare requested size is lesser than original size
             if self.width > width  && self.height > height {
                 return image
@@ -49,8 +47,6 @@ public class ImageAspectRationResizer
             } else {
                 newHeight = (height * newWidth) / width
             }
-            
-            print("NEW W:\(newWidth) H:\(newHeight)")
             
             let bitsPerComponent = CGImageGetBitsPerComponent(cgImage)
             let bytesPerRow = CGImageGetBytesPerRow(cgImage)

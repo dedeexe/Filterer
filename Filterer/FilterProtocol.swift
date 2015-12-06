@@ -11,6 +11,7 @@ public protocol FilterProtocol
     
     var maxValue : Int { get }
     var minValue : Int { get }
+    var defaultValue : Int { get }
     
     init(value:Int)
     func apply() -> RGBAImage?

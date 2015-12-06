@@ -10,13 +10,11 @@ import UIKit
 
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
+
     var filterManager : FilterManager!
-    
     var filteredImage: UIImage?
     var filteringImage: UIImage?
-    
-    var oldFilterValue : Int = 0
-    
+    var currentFilter : Filter?
     
     @IBOutlet var imageView: UIImageView!
     @IBOutlet var originalImageView : UIImageView!
@@ -26,9 +24,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     @IBOutlet var filterValueView : UIView!
     
     @IBOutlet var filterButton: UIButton!
-    @IBOutlet var redFilterButton: UIButton!
-    @IBOutlet var greenFilterButton: UIButton!
-    @IBOutlet var blueFilterButton: UIButton!
     @IBOutlet var brightFilterButton: UIButton!
     
     
@@ -95,8 +90,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         dismissViewControllerAnimated(true, completion: nil)
         if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
             originalImageView.image = image
-            imageView.image = image
             filterManager.image = image
+            imageView.image = filterManager.imageThumb
+
         }
     }
     
@@ -117,24 +113,35 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         }
     }
 
+    
     @IBAction func onFilterActivated(sender: UIButton) {
-        
-        var filterName:FilterType?
         
         switch sender
         {
             case self.brightFilterButton:
-                filterName = FilterType.BRIGHTNESS
+                self.currentFilter = filterManager.brigthnessFilter
             default:
-                filterName = nil
+                return
         }
+        
+        showFilterValueView()
+        self.slideFilterValue.maximumValue = Float(self.currentFilter!.maxValue)
+        self.slideFilterValue.minimumValue = Float(self.currentFilter!.minValue)
+        
         
     }
     
+    
     @IBAction func onChangeFilterValue(sender:UISlider)
     {
-        //TODO: Implements filter value change
-        print("No filter selected")
+        guard let filter = self.currentFilter else
+        {
+            NSLog("No present filter configurated")
+            return
+        }
+        
+        filter.value = Int(sender.value)
+        self.imageView.image = self.filterManager.imageThumb
     }
     
     //Cancel lasts changes

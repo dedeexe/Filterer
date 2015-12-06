@@ -14,6 +14,7 @@ public class Filter : FilterProtocol
 
     public var maxValue : Int { return 100 }
     public var minValue : Int { return 0 }
+    public var defaultValue : Int { return 0 }
 
     
     //MARK: Methods
@@ -34,7 +35,7 @@ public class Filter : FilterProtocol
             return nil
         }
         
-        guard let image = RGBAImage(rgbaImage: rgbaImage) else {
+        guard let image = RGBAImage(image: rgbaImage.toUIImage()!) else {
             return nil
         }
         

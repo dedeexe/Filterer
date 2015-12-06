@@ -17,6 +17,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     var currentFilter : Filter?
     var currentFilterStartValue : Int?
     
+    var originalViewInserted : Bool = false
+    
     @IBOutlet weak var workingView: UIView!
     @IBOutlet weak var originalView: UIView!
     
@@ -51,7 +53,16 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         //self.insertOriginalImageView()
 
     }
-
+    
+    override func viewDidAppear(animated: Bool)
+    {
+        if !self.originalViewInserted
+        {
+            insertOriginalImageView()
+            self.originalViewInserted = true
+        }
+    }
+    
     
     // MARK: Share
     @IBAction func onShare(sender: AnyObject) {
@@ -114,7 +125,10 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     }
     
     
+    //-----------------------------------------------------------------------------------------
     // MARK:- Events
+    //-----------------------------------------------------------------------------------------
+
     @IBAction func onFilter(sender: UIButton) {
         if (sender.selected) {
             hideSecondaryMenu()
@@ -160,6 +174,11 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         {
             compareButton.enabled = true
         }
+        
+        if compareButton.selected {
+            onCompare(compareButton)
+        }
+        
     }
     
     //Cancel lasts changes
@@ -193,10 +212,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     }
     
     //-----------------------------------------------------------------------------------------
-    //MARK: - SECONDARY MENU'S
+    //MARK: - Secondary Menu's
     //-----------------------------------------------------------------------------------------
     
-    // MARK: Hide and Show Secondary Menu
     func showSecondaryMenu() {
         view.addSubview(secondaryMenu)
         
@@ -227,26 +245,34 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     }
     
     
-    
-    //MARK: Hide and Show CompareView
+    //-----------------------------------------------------------------------------------------
+    //MARK: - Hide and Show CompareView
+    //-----------------------------------------------------------------------------------------
+
     func showOriginalCompareImage()
     {
-        insertOriginalImageView()
         self.originalView.hidden = false
-        self.workingView.alpha = 0.0
-        self.originalView.setNeedsDisplay()
+
+        UIView.animateWithDuration(0.4) { () -> Void in
+            self.workingView.alpha = 0.0
+        }
+
     }
 
     func hideOriginalCompareImage()
     {
-        self.originalView.hidden = true
-        self.workingView.alpha = 1.0
-        removeOriginalImageView()
+        UIView.animateWithDuration(0.4, animations: {
+            self.workingView.alpha = 1.0
+            }) { completed in
+                if completed {
+                    self.originalView.hidden = true
+                }
+            }
     }
     
     func insertOriginalImageView()
     {
-        self.view.insertSubview(originalView, belowSubview: workingView)
+        self.view.insertSubview(originalView!, belowSubview: workingView)
         self.originalView.frame = self.workingView.frame
         self.originalView.hidden = true
     }
@@ -257,7 +283,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     }
     
     //-----------------------------------------------------------------------------------------
-    //MARK: - FILTER
+    //MARK: - Filters
     //-----------------------------------------------------------------------------------------
 
     //Show the View with values to configurate colors

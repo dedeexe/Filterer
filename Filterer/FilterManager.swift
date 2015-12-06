@@ -9,51 +9,30 @@
 
 import UIKit
 
-public enum FilterType : String
-{
-    case RGB            = "RGB"
-    case BRIGHTNESS     = "Brightness"
-    
-    static var collection : [FilterType.RawValue : FilterType] {
-        
-        let ret : [FilterType.RawValue : FilterType] = [
-            //FilterType.RGB.rawValue : FilterType.RGB,
-            FilterType.BRIGHTNESS.rawValue : FilterType.BRIGHTNESS
-        ]
-        
-        return ret
-    }
-}
-
-
-public enum FilterControlError : ErrorType
-{
-    case NoImageLoaded
-    case NoFilterSelected
-}
-
-
+/**
+ A Manager of filter to apply on an image. 
+ FilterManager instantiate insternally all filters and use it to change image properties.
+*/
 public class FilterManager
 {
     
-    //-------------------------------------------------------------------------------
     //MARK: - Properties
-    //-------------------------------------------------------------------------------
 
-    private var sourceImage : RGBAImage?
+    private var _sourceImage : RGBAImage?
+    private var _workSourceImage : RGBAImage?
+    private var _workFilteredImage : RGBAImage?
     
-    private var thumbSourceImage : RGBAImage?
-    private var thumbFilteredImage : RGBAImage?
+    private var _smallSizeWidth : Int
+    private var _smallSizeHeight : Int
     
-    private var currentFilter : FilterValue?
+    private var _currentFilter : Filter?
     
-    private var thumbSizeWidth : Int
-    private var thumbSizeHeight : Int
+    private var _brigthnessFilter : BrightnessFilter?
     
     init(width:Int = 400, height:Int = 300)
     {
-        self.thumbSizeWidth = width
-        self.thumbSizeHeight = height
+        self._smallSizeWidth = width
+        self._smallSizeHeight = height
     }
     
     
@@ -64,25 +43,28 @@ public class FilterManager
         {
             guard let newImage = newValue else
             {
-                self.sourceImage = nil
+                self._sourceImage = nil
                 return
             }
             
-            self.sourceImage = RGBAImage(image: newImage)
-
-            let imageResizer = ImageAspectRationResizer(image: newValue!, width: self.thumbSizeWidth , height: self.thumbSizeHeight)
+            self.resetAllFilters()
             
+            self._sourceImage = RGBAImage(image: newImage)
+
+            let imageResizer = ImageAspectRationResizer(image: newValue!, width: self._smallSizeWidth , height: self._smallSizeHeight)
             
             if let renderedImage = imageResizer.renderedImage {
-                self.thumbSourceImage = RGBAImage(image: renderedImage)
-                self.thumbFilteredImage = self.thumbSourceImage
+                
+                NSLog("renderedImage: %f, %f", renderedImage.size.width, renderedImage.size.height)
+                
+                self._workSourceImage = RGBAImage(image: renderedImage)
+                self._workFilteredImage = self._workSourceImage
             }
-
         }
         
         get
         {
-            return self.sourceImage?.toUIImage()
+            return self._sourceImage?.toUIImage()
         }
     }
     
@@ -92,14 +74,14 @@ public class FilterManager
     {
         get
         {
-            guard var retImage = self.sourceImage else
+            guard var retImage = self._sourceImage else
             {
                 return nil
             }
 
-            for (_, filterItem) in self.filterList
+            if let filterItem = self._currentFilter
             {
-                retImage = (RGBAImage(rgbaImage: retImage)?.filter(filterItem.filter))!
+                retImage = (RGBAImage(rgbaImage: retImage)?.filter(filterItem))!
             }
 
             return retImage.toUIImage()
@@ -112,80 +94,41 @@ public class FilterManager
         
         get
         {
-            guard var retImage = self.thumbFilteredImage else
+            guard let retImage = self._workSourceImage else
             {
                 return nil
             }
             
-            for (_, filterItem) in self.filterList
+            if let filterItem = self._currentFilter
             {
-                retImage = (RGBAImage(rgbaImage: retImage)?.filter(filterItem.filter))!
+                self._workFilteredImage = (RGBAImage(rgbaImage: retImage)?.filter(filterItem))!
             }
             
-            return retImage.toUIImage()
+            return self._workFilteredImage!.toUIImage()
         }
     }
     
-    private var filterList : [FilterType : FilterValue] = [
+    
+    
+    //MARK: Filters
+    public var brigthnessFilter : BrightnessFilter
+    {
+        if let filter = self._brigthnessFilter
+        {
+            self._currentFilter = filter
+            return filter
+        }
         
-        //Color Filters
-        //FilterType.RGB              : FilterValue(filter: RGBFilter()),
-        FilterType.BRIGHTNESS       : FilterValue(filter: BrightnessFilter())
+        self._brigthnessFilter = BrightnessFilter()
+        self._currentFilter = self._brigthnessFilter
+        return self._brigthnessFilter!
+    }
+    
+    
 
-    ]
-    
-    
-    //Reset all filters
-    public func reset()
+    private func resetAllFilters()
     {
-        for (_, fltr) in filterList
-        {
-            fltr.reset()
-        }
+        self._currentFilter = nil
+        self._brigthnessFilter = nil
     }
-    
-    //Save all filters
-    public func saveChanges()
-    {
-        for (_, fltr) in filterList
-        {
-            fltr.save()
-        }
-    }
-    
-    
-    //Cancel all filters changes
-    public func cancelChanges()
-    {
-        for (_, fltr) in filterList
-        {
-            fltr.cancel()
-        }
-    }
-    
-    
-    //-------------------------------------------------------------------------------
-    //MARK: - Filter Settings
-    //-------------------------------------------------------------------------------
-    
-    public var brightness : Int {
-        
-        set {
-            guard let filter = filterList[FilterType.BRIGHTNESS] else { return }
-            
-            var value = max(-255, newValue)
-            value = min(value, 255)
-            
-            filter.value = newValue
-        }
-        
-        get{
-            guard let filter = filterList[FilterType.BRIGHTNESS] else { return 0 }
-            
-            return filter.value
-        }
-    }
-    
-    
-    
 }

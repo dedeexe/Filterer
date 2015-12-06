@@ -17,22 +17,11 @@ public class RGBFilter : Filter
         
         super.init(value: 0)
     }
-
-    public override var isActivated : Bool {
-        return self.defaultValue != self.valueRed ||
-                self.defaultValue != self.valueGreen ||
-                self.defaultValue != self.valueBlue
-    }
-
     
     public required init(value: Int) {
         fatalError("init(value:) has not been implemented")
     }
     
-    
-    public override var defaultValue : Int {
-        return 100
-    }
     
     public override func apply() -> RGBAImage? {
         
@@ -41,26 +30,22 @@ public class RGBFilter : Filter
         }
         
         //Just process the image if filter is activated
-        if self.isActivated
-        {
-            
-            let width = image.width
-            let height = image.height
-            
-            for y in 0..<height {
-                for x in 0..<width {
-                    let position = y * width + x
-                    var pixel = image.pixels[position]
-                    
-                    pixel.blue = UInt8( Int(pixel.blue) * self.valueBlue / 100 )
-                    pixel.red = UInt8( Int(pixel.blue) * self.valueRed / 100 )
-                    pixel.green = UInt8( Int(pixel.blue) * self.valueGreen / 100 )
-                    
-                    image.pixels[position] = pixel
-                }
+        let width = image.width
+        let height = image.height
+        
+        for y in 0..<height {
+            for x in 0..<width {
+                let position = y * width + x
+                var pixel = image.pixels[position]
+                
+                pixel.blue = UInt8( Int(pixel.blue) * self.valueBlue / 100 )
+                pixel.red = UInt8( Int(pixel.blue) * self.valueRed / 100 )
+                pixel.green = UInt8( Int(pixel.blue) * self.valueGreen / 100 )
+                
+                image.pixels[position] = pixel
             }
         }
-        
+
         return image
         
     }

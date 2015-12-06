@@ -8,35 +8,40 @@
 
 import UIKit
 
-class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIGestureRecognizerDelegate {
+
 
     var filterManager : FilterManager!
-    
     var filteredImage: UIImage?
     var filteringImage: UIImage?
+    var currentFilter : Filter?
+    var currentFilterStartValue : Int?
     
-    var workingFilter: FilterValue?
-    var oldFilterValue : Int = 0
+    var compareLongPress : UILongPressGestureRecognizer?
     
+    var originalViewInserted : Bool = false
     
-    @IBOutlet var imageView: UIImageView!
-    @IBOutlet var originalImageView : UIImageView!
-    
-    @IBOutlet var secondaryMenu: UIView!
-    @IBOutlet var bottomMenu: UIView!
-    @IBOutlet var filterValueView : UIView!
-    
-    @IBOutlet var filterButton: UIButton!
-    @IBOutlet var redFilterButton: UIButton!
-    @IBOutlet var greenFilterButton: UIButton!
-    @IBOutlet var blueFilterButton: UIButton!
-    @IBOutlet var brightFilterButton: UIButton!
+    @IBOutlet weak var workingView: UIView!
+    @IBOutlet weak var originalView: UIView!
     
     
-    @IBOutlet var slideFilterValue : UISlider!
+    @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet weak var originalImageView : UIImageView!
+    
+    @IBOutlet weak var secondaryMenu: UIView!
+    @IBOutlet weak var bottomMenu: UIView!
+    @IBOutlet weak var filterValueView : UIView!
+    
+    @IBOutlet weak var filterButton: UIButton!
+    @IBOutlet weak var brightFilterButton: UIButton!
+    
+    @IBOutlet weak var compareButton: UIButton!
+    
+    @IBOutlet weak var slideFilterValue : UISlider!
     
     
     override func viewDidLoad() {
+        
         super.viewDidLoad()
         secondaryMenu.backgroundColor = UIColor.lightGrayColor().colorWithAlphaComponent(0.95)
         secondaryMenu.translatesAutoresizingMaskIntoConstraints = false
@@ -45,17 +50,32 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         filterValueView.translatesAutoresizingMaskIntoConstraints = false
         
         self.filterManager = FilterManager(width: Int(self.imageView.frame.width) , height: Int(self.imageView.frame.height))
+        self.compareButton.enabled = false
+        
     }
-
     
-    // MARK: Share
+    override func viewDidAppear(animated: Bool)
+    {
+        if !self.originalViewInserted
+        {
+            insertOriginalImageView()
+            self.originalViewInserted = true
+        }
+    }
+    
+    
+    //-----------------------------------------------------------------------------------------
+    // MARK:- Events
+    //-----------------------------------------------------------------------------------------
+    
+    //Share
     @IBAction func onShare(sender: AnyObject) {
         let activityController = UIActivityViewController(activityItems: ["Check out our really cool app", imageView.image!], applicationActivities: nil)
         presentViewController(activityController, animated: true, completion: nil)
     }
     
     
-    // MARK: Main Events
+    // Main Events
     @IBAction func onNewPhoto(sender: AnyObject) {
         let actionSheet = UIAlertController(title: "New Photo", message: nil, preferredStyle: .ActionSheet)
         
@@ -72,6 +92,108 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         self.presentViewController(actionSheet, animated: true, completion: nil)
     }
     
+
+    //Open Filter Menu
+    @IBAction func onFilter(sender: UIButton) {
+        if (sender.selected) {
+            hideSecondaryMenu()
+            sender.selected = false
+        } else {
+            showSecondaryMenu()
+            sender.selected = true
+        }
+    }
+
+    
+    //When Activate a filter
+    @IBAction func onFilterActivated(sender: UIButton) {
+        
+        switch sender
+        {
+            case self.brightFilterButton:
+                self.currentFilter = filterManager.brigthnessFilter
+            default:
+                return
+        }
+        
+        showFilterValueView()
+        self.slideFilterValue.maximumValue = Float(self.currentFilter!.maxValue)
+        self.slideFilterValue.minimumValue = Float(self.currentFilter!.minValue)
+        self.slideFilterValue.value = Float(self.currentFilter!.value)
+        self.currentFilterStartValue = self.currentFilter!.value
+        
+    }
+    
+    //Set a filter value
+    @IBAction func onChangeFilterValue(sender:UISlider)
+    {
+        guard let filter = self.currentFilter else
+        {
+            NSLog("No present filter configurated")
+            return
+        }
+        
+        filter.value = Int(sender.value)
+        self.imageView.image = self.filterManager.imageThumb
+        
+        if(!self.compareButton.enabled)
+        {
+            compareButton.enabled = true
+        }
+        
+        if compareButton.selected {
+            onCompare(compareButton)
+        }
+        
+    }
+    
+    //Cancel lasts changes
+    @IBAction func onFilterChangesCancel(sender:UIButton)
+    {
+        self.currentFilter!.value = self.currentFilterStartValue!
+        self.imageView.image = self.filterManager.imageThumb
+        hideFilterValueView()
+        self.currentFilter = nil
+    }
+
+    //Confirm lasts changes
+    @IBAction func onFilterChangesConfirm(sender:UIButton)
+    {
+        self.imageView.image = self.filterManager.imageThumb
+        hideFilterValueView()
+        self.currentFilter = nil
+    }
+    
+    
+    @IBAction func onCompare(sender:UIButton)
+    {
+
+        sender.selected = !sender.selected
+        showOriginalImageView(sender.selected)
+        
+    }
+    
+    
+    @IBAction func onCompareLongePress(longPress: UIGestureRecognizer)
+    {
+        if compareButton.enabled
+        {
+            if longPress.state == UIGestureRecognizerState.Began {
+                self.compareButton.selected = true
+                showOriginalImageView(true)
+            }
+            
+            if longPress.state == UIGestureRecognizerState.Ended {
+                self.compareButton.selected = false
+                showOriginalImageView(false)
+            }            
+        }
+    }
+    
+    
+    //-----------------------------------------------------------------------------------------
+    //MARK: - Select Photo
+    //-----------------------------------------------------------------------------------------
     
     func showCamera() {
         let cameraPicker = UIImagePickerController()
@@ -95,9 +217,11 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]) {
         dismissViewControllerAnimated(true, completion: nil)
         if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
-            originalImageView.image = image
-            imageView.image = image
+            self.compareButton.enabled = false
+            
             filterManager.image = image
+            imageView.image = filterManager.imageThumb
+            originalImageView.image = filterManager.imageThumb
         }
     }
     
@@ -106,102 +230,16 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         dismissViewControllerAnimated(true, completion: nil)
     }
     
-    
-    // MARK:- Events
-    @IBAction func onFilter(sender: UIButton) {
-        if (sender.selected) {
-            hideSecondaryMenu()
-            sender.selected = false
-        } else {
-            showSecondaryMenu()
-            sender.selected = true
-        }
-    }
-
-    @IBAction func onFilterActivated(sender: UIButton) {
-        
-        var filterName:FilterType?
-        
-        switch sender
-        {
-            case self.brightFilterButton:
-                filterName = FilterType.BRIGHTNESS
-            default:
-                filterName = nil
-        }
-        
-        if let ftname = filterName
-        {
-            if let fltr = filterManager.filter(ftname)
-            {
-                self.workingFilter = fltr
-                
-                self.slideFilterValue!.value = Float(self.workingFilter!.defaultValue)
-                self.slideFilterValue.maximumValue = Float(self.workingFilter!.maxValue)
-                self.slideFilterValue.minimumValue = Float(self.workingFilter!.minValue)
-                
-                slideFilterValue.value = Float(self.workingFilter!.value)
-                showFilterValueView()
-            }
-        }
-    }
-    
-    
-    @IBAction func onChangeFilterValue(sender:UISlider)
-    {
-        if let wrkFilter = self.workingFilter {
-            
-            let newValue = Int(sender.value)
-            wrkFilter.value = newValue
-            
-            print("Filter value: \(newValue)")
-
-            self.imageView.image = self.filterManager.imageThumb
-
-//            dispatch_async(dispatch_get_main_queue()) {
-//                do {
-//                    try self.filterManager.applyFilter()
-//                    self.imageView.image = self.filterManager.imageThumb
-//                } catch {
-//                    self.imageView.image = nil
-//                }
-//            }
-            
-            return
-        }
-        
-        print("No filter selected")
-    }
-    
-    
-    //Cancel lasts changes
-    @IBAction func onFilterChangesCancel(sender:UIButton)
-    {
-        self.filterManager.cancelChanges()
-        self.imageView.image = self.filterManager.imageThumb
-        hideFilterValueView()
-    }
-
-    //Confirm lasts changes
-    @IBAction func onFilterChangesConfirm(sender:UIButton)
-    {
-        self.filterManager.saveChanges()
-        self.imageView.image = self.filterManager.imageThumb
-        hideFilterValueView()
-    }
-    
     //-----------------------------------------------------------------------------------------
-    //MARK: - SECONDARY MENU'S
+    //MARK: - Secondary Menu's
     //-----------------------------------------------------------------------------------------
     
-    // MARK: Hide and Show Secondary Menu
     func showSecondaryMenu() {
         view.addSubview(secondaryMenu)
         
         let bottomConstraint = secondaryMenu.bottomAnchor.constraintEqualToAnchor(bottomMenu.topAnchor)
         let leftConstraint = secondaryMenu.leftAnchor.constraintEqualToAnchor(view.leftAnchor)
         let rightConstraint = secondaryMenu.rightAnchor.constraintEqualToAnchor(view.rightAnchor)
-        
         let heightConstraint = secondaryMenu.heightAnchor.constraintEqualToConstant(44)
         
         NSLayoutConstraint.activateConstraints([bottomConstraint, leftConstraint, rightConstraint, heightConstraint])
@@ -224,20 +262,46 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         }
     }
     
-    //MARK: Hide and Show CompareView
-    func showOriginalCompareImage()
-    {
-        
-    }
-
-    func hideOriginalCompareImage()
-    {
-
-    }
-    
     
     //-----------------------------------------------------------------------------------------
-    //MARK: - FILTER
+    //MARK: - Hide and Show CompareView
+    //-----------------------------------------------------------------------------------------
+    
+    func insertOriginalImageView()
+    {
+        self.view.insertSubview(originalView!, belowSubview: workingView)
+        self.originalView.frame = self.workingView.frame
+        self.originalView.hidden = true
+    }
+
+    func removeOriginalImageView()
+    {
+        self.originalView.removeFromSuperview()
+    }
+    
+    func showOriginalImageView(show : Bool)
+    {
+        if show {
+            self.originalView.hidden = false
+            
+            UIView.animateWithDuration(0.4) { () -> Void in
+                self.workingView.alpha = 0
+            }
+            
+            return
+        }
+        
+        UIView.animateWithDuration(0.4, animations: {
+            self.workingView.alpha = 1.0
+            }) { completed in
+                if completed {
+                    self.originalView.hidden = true
+                }
+        }
+    }
+    
+    //-----------------------------------------------------------------------------------------
+    //MARK: - Filters
     //-----------------------------------------------------------------------------------------
 
     //Show the View with values to configurate colors
@@ -245,11 +309,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     {
         
         //Check if exist a filter to work
-        guard let _ = self.workingFilter else
-        {
-            print("No filter to work")
-            return
-        }
+        //TODO: Put herer a filter validation
         
         view.insertSubview(filterValueView, aboveSubview: bottomMenu)
         
@@ -283,5 +343,4 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
                 }
             }
     }
-    
 }

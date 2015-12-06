@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIGestureRecognizerDelegate {
 
 
     var filterManager : FilterManager!
@@ -16,6 +16,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     var filteringImage: UIImage?
     var currentFilter : Filter?
     var currentFilterStartValue : Int?
+    
+    var compareLongPress : UILongPressGestureRecognizer?
     
     var originalViewInserted : Bool = false
     
@@ -50,8 +52,13 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         self.filterManager = FilterManager(width: Int(self.imageView.frame.width) , height: Int(self.imageView.frame.height))
         self.compareButton.enabled = false
         
-        //self.insertOriginalImageView()
-
+        //ImageView gesture recognizer
+        //self.originalView.userInteractionEnabled = true
+        //compareLongPress = UILongPressGestureRecognizer(target: self, action: "onCompareLongePress:")
+        //compareLongPress!.minimumPressDuration = 0.1
+        //compareLongPress!.delegate = self
+        //self.originalView.addGestureRecognizer(compareLongPress!)
+        
     }
     
     override func viewDidAppear(animated: Bool)
@@ -64,14 +71,18 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     }
     
     
-    // MARK: Share
+    //-----------------------------------------------------------------------------------------
+    // MARK:- Events
+    //-----------------------------------------------------------------------------------------
+    
+    //Share
     @IBAction func onShare(sender: AnyObject) {
         let activityController = UIActivityViewController(activityItems: ["Check out our really cool app", imageView.image!], applicationActivities: nil)
         presentViewController(activityController, animated: true, completion: nil)
     }
     
     
-    // MARK: Main Events
+    // Main Events
     @IBAction func onNewPhoto(sender: AnyObject) {
         let actionSheet = UIAlertController(title: "New Photo", message: nil, preferredStyle: .ActionSheet)
         
@@ -88,47 +99,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         self.presentViewController(actionSheet, animated: true, completion: nil)
     }
     
-    
-    func showCamera() {
-        let cameraPicker = UIImagePickerController()
-        cameraPicker.delegate = self
-        cameraPicker.sourceType = .Camera
-        
-        presentViewController(cameraPicker, animated: true, completion: nil)
-    }
-    
-    
-    func showAlbum() {
-        let cameraPicker = UIImagePickerController()
-        cameraPicker.delegate = self
-        cameraPicker.sourceType = .PhotoLibrary
-        
-        presentViewController(cameraPicker, animated: true, completion: nil)
-    }
-    
-    
-    // MARK: UIImagePickerControllerDelegate
-    func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]) {
-        dismissViewControllerAnimated(true, completion: nil)
-        if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
-            self.compareButton.enabled = false
-            
-            filterManager.image = image
-            imageView.image = filterManager.imageThumb
-            originalImageView.image = filterManager.imageThumb
-        }
-    }
-    
-    
-    func imagePickerControllerDidCancel(picker: UIImagePickerController) {
-        dismissViewControllerAnimated(true, completion: nil)
-    }
-    
-    
-    //-----------------------------------------------------------------------------------------
-    // MARK:- Events
-    //-----------------------------------------------------------------------------------------
 
+    //Open Filter Menu
     @IBAction func onFilter(sender: UIButton) {
         if (sender.selected) {
             hideSecondaryMenu()
@@ -140,6 +112,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     }
 
     
+    //When Activate a filter
     @IBAction func onFilterActivated(sender: UIButton) {
         
         switch sender
@@ -158,7 +131,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         
     }
     
-    
+    //Set a filter value
     @IBAction func onChangeFilterValue(sender:UISlider)
     {
         guard let filter = self.currentFilter else
@@ -201,14 +174,69 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     @IBAction func onCompare(sender:UIButton)
     {
-        if sender.selected {
-            hideOriginalCompareImage()
-            sender.selected = false
-            return
-        }
+
+        sender.selected = !sender.selected
+        showOriginalImageView(sender.selected)
         
-        sender.selected = true
-        showOriginalCompareImage()
+    }
+    
+    
+    @IBAction func onCompareLongePress(longPress: UIGestureRecognizer)
+    {
+        print("Long Press \(NSDate())")
+        if compareButton.enabled
+        {
+            if longPress.state == UIGestureRecognizerState.Began {
+                self.compareButton.selected = true
+                showOriginalImageView(true)
+            }
+            
+            if longPress.state == UIGestureRecognizerState.Ended {
+                self.compareButton.selected = false
+                showOriginalImageView(false)
+            }
+            
+        }
+    }
+    
+    
+    //-----------------------------------------------------------------------------------------
+    //MARK: - Select Photo
+    //-----------------------------------------------------------------------------------------
+    
+    func showCamera() {
+        let cameraPicker = UIImagePickerController()
+        cameraPicker.delegate = self
+        cameraPicker.sourceType = .Camera
+        
+        presentViewController(cameraPicker, animated: true, completion: nil)
+    }
+    
+    
+    func showAlbum() {
+        let cameraPicker = UIImagePickerController()
+        cameraPicker.delegate = self
+        cameraPicker.sourceType = .PhotoLibrary
+        
+        presentViewController(cameraPicker, animated: true, completion: nil)
+    }
+    
+    
+    // MARK: UIImagePickerControllerDelegate
+    func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]) {
+        dismissViewControllerAnimated(true, completion: nil)
+        if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
+            self.compareButton.enabled = false
+            
+            filterManager.image = image
+            imageView.image = filterManager.imageThumb
+            originalImageView.image = filterManager.imageThumb
+        }
+    }
+    
+    
+    func imagePickerControllerDidCancel(picker: UIImagePickerController) {
+        dismissViewControllerAnimated(true, completion: nil)
     }
     
     //-----------------------------------------------------------------------------------------
@@ -221,7 +249,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         let bottomConstraint = secondaryMenu.bottomAnchor.constraintEqualToAnchor(bottomMenu.topAnchor)
         let leftConstraint = secondaryMenu.leftAnchor.constraintEqualToAnchor(view.leftAnchor)
         let rightConstraint = secondaryMenu.rightAnchor.constraintEqualToAnchor(view.rightAnchor)
-        
         let heightConstraint = secondaryMenu.heightAnchor.constraintEqualToConstant(44)
         
         NSLayoutConstraint.activateConstraints([bottomConstraint, leftConstraint, rightConstraint, heightConstraint])
@@ -248,27 +275,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     //-----------------------------------------------------------------------------------------
     //MARK: - Hide and Show CompareView
     //-----------------------------------------------------------------------------------------
-
-    func showOriginalCompareImage()
-    {
-        self.originalView.hidden = false
-
-        UIView.animateWithDuration(0.4) { () -> Void in
-            self.workingView.alpha = 0.0
-        }
-
-    }
-
-    func hideOriginalCompareImage()
-    {
-        UIView.animateWithDuration(0.4, animations: {
-            self.workingView.alpha = 1.0
-            }) { completed in
-                if completed {
-                    self.originalView.hidden = true
-                }
-            }
-    }
     
     func insertOriginalImageView()
     {
@@ -280,6 +286,27 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     func removeOriginalImageView()
     {
         self.originalView.removeFromSuperview()
+    }
+    
+    func showOriginalImageView(show : Bool)
+    {
+        if show {
+            self.originalView.hidden = false
+            
+            UIView.animateWithDuration(0.4) { () -> Void in
+                self.workingView.alpha = 0
+            }
+            
+            return
+        }
+        
+        UIView.animateWithDuration(0.4, animations: {
+            self.workingView.alpha = 1.0
+            }) { completed in
+                if completed {
+                    self.originalView.hidden = true
+                }
+        }
     }
     
     //-----------------------------------------------------------------------------------------
@@ -325,5 +352,4 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
                 }
             }
     }
-    
 }

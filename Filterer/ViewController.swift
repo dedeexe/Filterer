@@ -52,13 +52,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         self.filterManager = FilterManager(width: Int(self.imageView.frame.width) , height: Int(self.imageView.frame.height))
         self.compareButton.enabled = false
         
-        //ImageView gesture recognizer
-        //self.originalView.userInteractionEnabled = true
-        //compareLongPress = UILongPressGestureRecognizer(target: self, action: "onCompareLongePress:")
-        //compareLongPress!.minimumPressDuration = 0.1
-        //compareLongPress!.delegate = self
-        //self.originalView.addGestureRecognizer(compareLongPress!)
-        
     }
     
     override func viewDidAppear(animated: Bool)
@@ -183,7 +176,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     @IBAction func onCompareLongePress(longPress: UIGestureRecognizer)
     {
-        print("Long Press \(NSDate())")
         if compareButton.enabled
         {
             if longPress.state == UIGestureRecognizerState.Began {
@@ -194,8 +186,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             if longPress.state == UIGestureRecognizerState.Ended {
                 self.compareButton.selected = false
                 showOriginalImageView(false)
-            }
-            
+            }            
         }
     }
     

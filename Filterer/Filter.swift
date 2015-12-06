@@ -42,9 +42,5 @@ public class Filter : FilterProtocol
         return image
     }
     
-    
-    deinit
-    {
-        print("Terminated Filter")
-    }
+
 }

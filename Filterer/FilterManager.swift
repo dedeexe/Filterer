@@ -28,6 +28,9 @@ public class FilterManager
     private var _currentFilter : Filter?
     
     private var _brigthnessFilter : BrightnessFilter?
+    private var _constrastFilter : ContrastFilter?
+    private var _grayScaleFilter : GrayFilter?
+
     
     init(width:Int = 400, height:Int = 300)
     {
@@ -109,8 +112,16 @@ public class FilterManager
     }
     
     
+    private func resetAllFilters()
+    {
+        self._currentFilter = nil
+        self._brigthnessFilter = nil
+    }
+    
+    
     
     //MARK: Filters
+    
     public var brigthnessFilter : BrightnessFilter
     {
         if let filter = self._brigthnessFilter
@@ -123,12 +134,32 @@ public class FilterManager
         self._currentFilter = self._brigthnessFilter
         return self._brigthnessFilter!
     }
-    
-    
 
-    private func resetAllFilters()
+    
+    public var constrastFilter : ContrastFilter
     {
-        self._currentFilter = nil
-        self._brigthnessFilter = nil
+        if let filter = self._constrastFilter
+        {
+            self._currentFilter = filter
+            return filter
+        }
+        
+        self._constrastFilter = ContrastFilter()
+        self._currentFilter = self._constrastFilter
+        return self._constrastFilter!
     }
+
+    public var grayScaleFilter : GrayFilter
+    {
+        if let filter = self._grayScaleFilter
+        {
+            self._currentFilter = filter
+            return filter
+        }
+        
+        self._grayScaleFilter = GrayFilter()
+        self._currentFilter = self._grayScaleFilter
+        return self._grayScaleFilter!
+    }
+
 }

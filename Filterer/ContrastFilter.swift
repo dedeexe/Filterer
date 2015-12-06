@@ -10,14 +10,14 @@ public class ContrastFilter : Filter
         
         var v : Int = value
         
-        v = max(v, -128)
-        v = min(v, 128)
+        v = max(v, -255)
+        v = min(v, 255)
         
         super.init(value: v)
     }
     
-    public override var maxValue : Int { return 128 }
-    public override var minValue : Int { return -128 }
+    public override var maxValue : Int { return 255 }
+    public override var minValue : Int { return -255 }
     public override var defaultValue : Int { return 0 }
     
     public override func apply() -> RGBAImage? {
@@ -31,21 +31,18 @@ public class ContrastFilter : Filter
         
         let rgbaImage = RGBAImage(rgbaImage: image)
         
-        print(width, height)
-        
+        //Constrast Factor
+        let factor = Double(259 * (self.value + 255)) / Double(255 * (259 - self.value))
+                
         for y in 0..<height {
             for x in 0..<width {
                 
                 let position = y * width + x
                 var pixel = rgbaImage!.pixels[position]
                 
-                var red   = Int(pixel.red) + self.value
-                var green = Int(pixel.green) + self.value
-                var blue  = Int(pixel.blue) + self.value
-                
-                //red   = (red > 255)   ? 255 : (red < 0)   ? 0 : red
-                //green = (green > 255) ? 255 : (green < 0) ? 0 : green
-                //blue  = (blue > 255)  ? 255 : (blue < 0)  ? 0 : blue
+                var red   = factor * Double(Int(pixel.red) - 128) + 128
+                var green = factor * Double(Int(pixel.green) - 128) + 128
+                var blue  = factor * Double(Int(pixel.blue) - 128) + 128
                 
                 red   = min(255, max(0, red))
                 green = min(255, max(0, green))
